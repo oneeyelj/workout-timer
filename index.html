@@ -178,11 +178,13 @@ lastTime=time;
 
 let count=Math.ceil(remaining);
 
+if(remaining > 5) window.lastCountdown =
+  
 if(count<=5 &&
 count>=1 &&
-!window["said"+count]){
+count!==window.lastCountdown){
 
-window["said"+count]=true;
+window.lastCountdown=count;
 speak(String(count));
 }
 
