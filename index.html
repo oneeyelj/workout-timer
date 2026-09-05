@@ -38,7 +38,6 @@ button{padding:18px;border:0;border-radius:15px;font-size:20px;font-weight:bold}
 <div class="status" id="status">Ready</div>
 <div class="exercise" id="exercise">Press Start</div>
 <div class="next" id="next">Next exercise will be announced</div>
-<div class="instruction"id="instruction"></div>
 
 <div class="timer" id="timer">30</div>
 
@@ -81,20 +80,6 @@ const exercises=[
 "Plank"
 ];
 
-const instructions=[
-"Jump feet out while raising arms overhead. Return to the starting position and repeat.",
-"Keep your body straight. Lower your chest toward the floor and push back up.",
-"Keep your feet about shoulder-width apart. Bend your knees and lower your hips, then stand back up.",
-"Support yourself on one forearm and the side of your foot. Keep your body straight.",
-"Lie on your back with knees bent. Lift your shoulders toward your knees and slowly lower back down.",
-"Step onto a sturdy step or platform with one foot, bring the other foot up, then step back down.",
-"Keep your elbows close to your body. Bend and straighten your arms using controlled movements.",
-"Run in place while driving your knees up toward your chest.",
-"Place your back against a wall and lower into a seated position. Hold the position.",
-"Start in a push-up position. Rotate your body to one side, return to center, then rotate to the other side.",
-"Step forward and lower your body until both knees are bent. Push through your front foot to return.",
-"Hold your body straight from your shoulders to your heels while supporting yourself on your forearms and toes."
-];
   
 let rotation=1;
 let index=0;
@@ -125,9 +110,6 @@ phase==="work" ? exercises[index] : "REST";
 
 document.getElementById("next").textContent=
 "Next: "+exercises[(index+1)%12];
-
-document.getElementById("instruction").textContent=
-phase==="work"?instructions[index]:"";
 
 document.getElementById("timer").textContent=
 Math.max(0,Math.ceil(remaining));
