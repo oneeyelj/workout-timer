@@ -75,12 +75,11 @@ const exercises=[
 "Triceps",
 "High Knees",
 "Wall Sits",
-"Push Up Rotations",
+"Push-Up Rotations",
 "Lunges",
 "Plank"
 ];
 
-  
 let rotation=1;
 let index=0;
 let phase="work";
@@ -179,8 +178,8 @@ lastTime=time;
 
 let count=Math.ceil(remaining);
 
-if(remaining > 5) window.lastCountdown =
-  
+if(remaining > 5) window.lastCountdown = 0;
+
 if(count<=5 &&
 count>=1 &&
 count!==window.lastCountdown){
@@ -255,6 +254,7 @@ window.said2=false;
 window.said3=false;
 window.said4=false;
 window.said5=false;
+
 update();
 }
 
