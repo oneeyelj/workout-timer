@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Workout Timer</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#111;color:white;font-family:Arial,sans-serif;text-align:center}
+.app{max-width:520px;margin:auto;padding:25px 18px}
+h1{font-size:28px;margin:5px}
+.sub{opacity:.65}
+.status{margin-top:25px;font-weight:bold}
+.exercise{font-size:40px;font-weight:bold;margin:25px 0 10px;min-height:50px}
+.next{opacity:.65}
+.timer{font-size:110px;font-weight:bold;margin:25px 0}
+.progress{height:12px;background:#333;border-radius:10px;overflow:hidden}
+.bar{height:100%;background:white;width:0}
+.buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:25px}
+button{padding:18px;border:0;border-radius:15px;font-size:20px;font-weight:bold}
+.start{background:white;color:#111}
+.dark{background:#333;color:white}
+.round{margin:20px}
+.dot{display:inline-block;width:10px;height:10px;background:#444;border-radius:50%;margin:4px}
+.dot.on{background:white}
+.list{margin-top:20px;text-align:left;background:#1c1c1c;padding:15px;border-radius:15px}
+.row{display:flex;justify-content:space-between;padding:8px;border-bottom:1px solid #333}
+.active{font-weight:bold}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+<h1>12-Exercise Workout</h1>
+<div class="sub">30 seconds work • 15 seconds rest • 2 rotations</div>
+
+<div class="status" id="status">Ready</div>
+<div class="exercise" id="exercise">Press Start</div>
+<div class="next" id="next">Next exercise will be announced</div>
+
+<div class="timer" id="timer">30</div>
+
+<div class="progress">
+<div class="bar" id="bar"></div>
+</div>
+
+<div class="buttons">
+<button class="start" onclick="start()">▶ Start</button>
+<button class="dark" onclick="pause()">⏸ Pause</button>
+<button class="dark" onclick="reset()">↻ Reset</button>
+</div>
+
+<div class="round">
+<span class="dot on" id="r1"></span>
+<span class="dot" id="r2"></span>
+</div>
+
+<div class="list">
+<strong>Workout Order</strong>
+<div id="list"></div>
+</div>
+
+</div>
+
+<script>
+
+const exercises=[
+"Jumping Jacks",
+"Push-Ups",
+"Squats",
+"Side Planks",
+"Crunches",
+"Step-Ups",
+"Triceps",
+"High Knees",
+"Wall Sits",
+"Push-Up Rotations",
+"Lunges",
+"Plank"
+];
+
+let rotation=1;
+let index=0;
+let phase="work";
+let remaining=30;
+let running=false;
+let lastTime=0;
+let animation;
+
+function speak(text){
+if("speechSynthesis" in window){
+speechSynthesis.cancel();
+let voice=new SpeechSynthesisUtterance(text);
+voice.rate=1.05;
+speechSynthesis.speak(voice);
+}
+}
+
+function update(){
+
+document.getElementById("status").textContent=
+phase==="work"
+? "Rotation "+rotation+" of 2 • WORK"
+: "Rotation "+rotation+" of 2 • REST";
+
+document.getElementById("exercise").textContent=
+phase==="work" ? exercises[index] : "REST";
+
+document.getElementById("next").textContent=
+"Next: "+exercises[(index+1)%12];
+
+document.getElementById("timer").textContent=
+Math.max(0,Math.ceil(remaining));
+
+let total=phase==="work"?30:15;
+
+document.getElementById("bar").style.width=
+((total-remaining)/total*100)+"%";
+
+document.getElementById("r1").className=
+rotation===1?"dot on":"dot";
+
+document.getElementById("r2").className=
+rotation===2?"dot on":"dot";
+
+document.querySelectorAll(".row").forEach((row,n)=>{
+row.className=n===index?"row active":"row";
+});
+}
+
+function nextPhase(){
+
+if(phase==="work"){
+
+phase="rest";
+remaining=15;
+speak("Rest");
+
+}else{
+
+index++;
+
+if(index>=12){
+
+if(rotation===2){
+
+running=false;
+document.getElementById("status").textContent="Workout Complete";
+document.getElementById("exercise").textContent="Great job!";
+document.getElementById("next").textContent="Two rotations complete.";
+document.getElementById("timer").textContent="✓";
+document.getElementById("bar").style.width="100%";
+
+speak("Workout complete. Great job!");
+return;
+}
+
+rotation=2;
+index=0;
+}
+
+phase="work";
+remaining=30;
+
+speak(exercises[index]);
+}
+}
+
+function tick(time){
+
+if(!running)return;
+
+if(!lastTime)lastTime=time;
+
+remaining-=(time-lastTime)/1000;
+lastTime=time;
+
+let count=Math.ceil(remaining);
+
+if(phase==="rest" &&
+count<=3 &&
+count>=1 &&
+!window["said"+count]){
+
+window["said"+count]=true;
+speak(String(count));
+}
+
+if(remaining<=0){
+
+window.said1=false;
+window.said2=false;
+window.said3=false;
+
+nextPhase();
+
+if(!running)return;
+}
+
+update();
+
+animation=requestAnimationFrame(tick);
+}
+
+function start(){
+
+if(running)return;
+
+running=true;
+lastTime=0;
+
+if(rotation===1 && index===0 && phase==="work" && remaining===30){
+speak("Jumping Jacks");
+}
+
+animation=requestAnimationFrame(tick);
+}
+
+function pause(){
+
+running=false;
+
+if(animation)cancelAnimationFrame(animation);
+
+if("speechSynthesis" in window)
+speechSynthesis.cancel();
+
+document.getElementById("status").textContent="Paused";
+
+update();
+}
+
+function reset(){
+
+running=false;
+
+if(animation)cancelAnimationFrame(animation);
+
+if("speechSynthesis" in window)
+speechSynthesis.cancel();
+
+rotation=1;
+index=0;
+phase="work";
+remaining=30;
+lastTime=0;
+
+window.said1=false;
+window.said2=false;
+window.said3=false;
+
+update();
+}
+
+document.getElementById("list").innerHTML=
+exercises.map((e,i)=>
+`<div class="row">
+<span>${i+1}. ${e}</span>
+<span>30s</span>
+</div>`
+).join("");
+
+update();
+
+</script>
+
+</body>
+</html>
